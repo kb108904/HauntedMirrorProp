@@ -33,14 +33,14 @@ def main():
 
     # Configure PocketSphinx
     speech = LiveSpeech(
-        verbose=False,
-        sampling_rate=16000,
-        buffer_size=2048,
-        no_search=False,
-        full_utt=False,
-        hmm='en-us',  # Path to the acoustic model
-        lm='en-us.lm.bin',  # Path to the language model
-        dic='cmudict-en-us.dict'  # Path to the pronunciation dictionary
+        # verbose=False,
+        # sampling_rate=16000,
+        # buffer_size=2048,
+        # no_search=False,
+        # full_utt=False,
+        # hmm='en-us',  # Path to the acoustic model
+        # lm='en-us.lm.bin',  # Path to the language model
+        # dic='cmudict-en-us.dict'  # Path to the pronunciation dictionary
     )
 
     print(f"Listening for keyword: '{keyword}'")
