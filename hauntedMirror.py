@@ -90,7 +90,7 @@ if __name__ == "__main__":
     parser.add_argument("--debug", action="store_true", help="Enable debug mode (no video playback)")
     args = parser.parse_args()
 
-    for video_path in [args.blood_video, args.lady_video, args.press_video]:
+    for video_path in [args.blood_video, args.lady_video]:
         if not video_path.exists():
             print(f"Error: Video file '{video_path}' not found.")
             sys.exit(1)
