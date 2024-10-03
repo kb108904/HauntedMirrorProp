@@ -67,9 +67,7 @@ def main(args):
 
     model_path = get_model_path()
     config = {
-        'hmm': os.path.join(model_path, 'en-us'),
-        'lm': os.path.join(model_path, 'en-us.lm.bin'),
-        'dict': os.path.join(model_path, 'cmudict-en-us.dict')
+
     }
 
     ps = Pocketsphinx()
