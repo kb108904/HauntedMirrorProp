@@ -69,8 +69,13 @@ def main(args):
             f.write(f"{command.lower()} /1e-40/\n")
 
     speech = LiveSpeech(
+        verbose=False,
         sampling_rate=16000,
-        kws='keywords.list'
+        buffer_size=2048,
+        no_search=False,
+        full_utt=False,
+        kws='keywords.list',
+        audio_device=args.audio_device
     )
     print("Listening for commands:")
     print("\n".join(commands.keys()))
@@ -91,6 +96,7 @@ if __name__ == "__main__":
     parser.add_argument("--lady-video", type=Path, required=True, help="Path to the 'lady' video file")
     # parser.add_argument("--press-video", type=Path, required=True, help="Path to the 'press' video file")
     parser.add_argument("--debug", action="store_true", help="Enable debug mode (no video playback)")
+    parser.add_argument("--audio-device", type=str, default="plughw:1,0", help="Audio device to use")
     args = parser.parse_args()
 
     for video_path in [args.blood_video, args.lady_video]:
