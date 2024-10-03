@@ -1,11 +1,9 @@
 import os
 import sys
-import argparse
-from pathlib import Path
-import alsaaudio
-import audioop
-from pocketsphinx import Pocketsphinx, get_model_path
+from pocketsphinx import LiveSpeech
 import vlc
+from pathlib import Path
+import argparse
 
 class VideoPlayer:
     def __init__(self, video_path, debug=False):
@@ -57,51 +55,32 @@ def main(args):
 
     # Define commands and their corresponding actions
     commands = {
-        "video pause": player.pause,
-        "video stop": player.stop,
-        "video bloody": lambda: play_video("blood"),
-        "video lady": lambda: play_video("lady"),
-        "video press": lambda: play_video("press"),
-        "video exit": sys.exit
+        "pause": player.pause,
+        "stop": player.stop,
+        "bloody": lambda: play_video("blood"),
+        "lady": lambda: play_video("lady"),
+        "press": lambda: play_video("press"),
+        "exit": sys.exit
     }
 
-    model_path = get_model_path()
-    config = {
+    # Create a keyword list file
+    with open('keywords.list', 'w') as f:
+        for command in commands.keys():
+            f.write(f"{command.lower()} /1e-40/\n")
 
-    }
-
-    ps = Pocketsphinx()
-    ps.keyword_threshold = 1e-20
-
-    for command in commands.keys():
-        ps.add_word(command, command)
-
-    # Set up ALSA audio input
-    inp = alsaaudio.PCM(alsaaudio.PCM_CAPTURE, alsaaudio.PCM_NORMAL)
-    inp.setchannels(1)
-    inp.setrate(16000)
-    inp.setformat(alsaaudio.PCM_FORMAT_S16_LE)
-    inp.setperiodsize(1024)
-
+    speech = LiveSpeech(kws='keywords.list')
     print("Listening for commands:")
     print("\n".join(commands.keys()))
     
-    try:
-        while True:
-            l, data = inp.read()
-            if l:
-                ps.process_raw(data, False, False)
-                
-                hypothesis = ps.get_hypothesis()
-                if hypothesis:
-                    print(f"Detected: {hypothesis}")
-                    for command, action in commands.items():
-                        if command in hypothesis.lower():
-                            print(f"Executing command: {command}")
-                            action()
-                            break
-    except KeyboardInterrupt:
-        print("Stopping...")
+    for phrase in speech:
+        detected_phrase = str(phrase).lower()
+        print(f"Detected: {detected_phrase}")
+        
+        for command, action in commands.items():
+            if command in detected_phrase:
+                print(f"Executing command: {command}")
+                action()
+                break
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Voice-controlled video player")
@@ -109,7 +88,6 @@ if __name__ == "__main__":
     parser.add_argument("--lady-video", type=Path, required=True, help="Path to the 'lady' video file")
     # parser.add_argument("--press-video", type=Path, required=True, help="Path to the 'press' video file")
     parser.add_argument("--debug", action="store_true", help="Enable debug mode (no video playback)")
-    parser.add_argument("--audio-device", type=str, default="plughw:1,0", help="Audio device to use")
     args = parser.parse_args()
 
     for video_path in [args.blood_video, args.lady_video]:
