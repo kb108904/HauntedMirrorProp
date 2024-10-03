@@ -70,7 +70,7 @@ def main(args):
         for command in commands.keys():
             f.write(f"{command.lower()} /1e-40/\n")
 
-    speech = LiveSpeech(kws='keywords.list')
+    speech = LiveSpeech(kws='keywords.list', input_device_index=0)
     print("Listening for commands:")
     print("\n".join(commands.keys()))
     
