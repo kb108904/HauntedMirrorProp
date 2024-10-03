@@ -69,11 +69,6 @@ def main(args):
             f.write(f"{command.lower()} /1e-40/\n")
 
     speech = LiveSpeech(
-        verbose=False,
-        sampling_rate=16000,
-        buffer_size=2048,
-        no_search=False,
-        full_utt=False,
         kws='keywords.list',
         audio_device=args.audio_device
     )
