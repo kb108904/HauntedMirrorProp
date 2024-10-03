@@ -76,7 +76,7 @@ def main(args):
     ps.keyword_threshold = 1e-20
 
     for command in commands.keys():
-        ps.add_keyword(command, command)
+        ps.add_word(command, command)
 
     # Set up ALSA audio input
     inp = alsaaudio.PCM(alsaaudio.PCM_CAPTURE, alsaaudio.PCM_NORMAL)
