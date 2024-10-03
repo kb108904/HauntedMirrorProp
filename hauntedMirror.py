@@ -4,6 +4,8 @@ from pocketsphinx import LiveSpeech
 import vlc
 from pathlib import Path
 import argparse
+import sounddevice as sd
+print(sd.query_devices())
 
 class VideoPlayer:
     def __init__(self, video_path, debug=False):
