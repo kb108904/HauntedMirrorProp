@@ -72,7 +72,7 @@ def main(args):
         'dict': os.path.join(model_path, 'cmudict-en-us.dict')
     }
 
-    ps = Pocketsphinx(**config)
+    ps = Pocketsphinx()
     ps.keyword_threshold = 1e-20
 
     for command in commands.keys():
