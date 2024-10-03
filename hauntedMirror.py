@@ -57,12 +57,12 @@ def main(args):
 
     # Define commands and their corresponding actions
     commands = {
-        "pause": player.pause,
-        "stop": player.stop,
-        "bloody": lambda: play_video("blood"),
-        "lady": lambda: play_video("lady"),
-        "press": lambda: play_video("press"),
-        "exit": sys.exit
+        "video pause": player.pause,
+        "video stop": player.stop,
+        "video bloody": lambda: play_video("blood"),
+        "video lady": lambda: play_video("lady"),
+        "video press": lambda: play_video("press"),
+        "video exit": sys.exit
     }
 
     model_path = get_model_path()
