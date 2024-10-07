@@ -36,6 +36,11 @@ class VideoPlayer:
             self.player.stop()
 
 def main(args):
+    print("Available audio devices:")
+    devices = sd.query_devices()
+    for i, device in enumerate(devices):
+        print(f"  {i} {device['name']}, {device['hostapi']} ({device['max_input_channels']} in, {device['max_output_channels']} out)")
+    
     videos = {
         "blood": args.blood_video,
         "lady": args.lady_video,
@@ -70,7 +75,7 @@ def main(args):
         for command in commands.keys():
             f.write(f"{command.lower()} /1e-40/\n")
 
-    speech = LiveSpeech(kws='keywords.list', input_device_index=0)
+    speech = LiveSpeech(kws='keywords.list', input_device_index=None)
     print("Listening for commands:")
     print("\n".join(commands.keys()))
     
@@ -97,4 +102,4 @@ if __name__ == "__main__":
             print(f"Error: Video file '{video_path}' not found.")
             sys.exit(1)
 
-    main(args)
+    main(args) 
