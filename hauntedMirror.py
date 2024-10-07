@@ -5,6 +5,8 @@ import vlc
 from pathlib import Path
 import argparse
 import sounddevice as sd
+
+print("Available audio devices:")
 print(sd.query_devices())
 
 class VideoPlayer:
@@ -36,10 +38,6 @@ class VideoPlayer:
             self.player.stop()
 
 def main(args):
-    print("Available audio devices:")
-    devices = sd.query_devices()
-    for i, device in enumerate(devices):
-        print(f"  {i} {device['name']}, {device['hostapi']} ({device['max_input_channels']} in, {device['max_output_channels']} out)")
     
     videos = {
         "blood": args.blood_video,
