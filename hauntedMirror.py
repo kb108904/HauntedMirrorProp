@@ -60,12 +60,12 @@ def main(args):
 
     # Define commands and their corresponding actions
     commands = {
-        "pause": player.pause,
-        "stop": player.stop,
-        "bloody": lambda: play_video("blood"),
-        "lady": lambda: play_video("lady"),
-        "press": lambda: play_video("press"),
-        "exit": sys.exit
+        "pause video": player.pause,
+        "stop video": player.stop,
+        "bloody video": lambda: play_video("blood"),
+        "lady video": lambda: play_video("lady"),
+        "press video": lambda: play_video("press"),
+        "exit video": sys.exit
     }
 
     # Create a keyword list file
