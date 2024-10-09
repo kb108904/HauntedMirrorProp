@@ -30,7 +30,7 @@ class VideoPlayer:
             270: vlc.VideoOrient.right_top
         }.get(rotation, vlc.VideoOrient.right_top)
         
-        self.player.video_set_orient(orient_value)
+        self.player.VideoOrient(orient_value)
 
     def play(self):
         if self.debug:
