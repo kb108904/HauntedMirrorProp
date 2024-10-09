@@ -23,20 +23,15 @@ class VideoPlayer:
             # Set video orientation
             self._set_video_orient(rotation)
     def _set_video_orient(self, rotation):
-        # VideoOrient values:
-        # 0: Normal (no rotation)
-        # 1: 90 degrees clockwise
-        # 2: 180 degrees
-        # 3: 90 degrees counterclockwise
         orient_value = {
-            0: 0,
-            90: 1,
-            180: 2,
-            270: 3
-        }.get(rotation, 0)
+            0: vlc.VideoOrient.Top,
+            90: vlc.VideoOrient.Right,
+            180: vlc.VideoOrient.Bottom,
+            270: vlc.VideoOrient.Left
+        }.get(rotation, vlc.VideoOrient.Top)
         
-        self.player.video_set_adjust_int(vlc.VideoAdjustOption.Enable, 1)
-        self.player.video_set_adjust_int(vlc.VideoAdjustOption.Rotate, orient_value)
+        self.player.video_set_orient(orient_value)
+
     def play(self):
         if self.debug:
             print(f"DEBUG: Playing video: {self.video_path} (Rotation: {self.rotation}°)")
