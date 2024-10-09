@@ -65,7 +65,7 @@ def main(args):
         "bloody video": lambda: play_video("blood"),
         "lady video": lambda: play_video("lady"),
         "press video": lambda: play_video("press"),
-        "exit video /EH G Z IH T  V IH D IY OW/\n": sys.exit
+        "EH G Z IH T  V IH D IY OW": sys.exit           #exit video
     }
 
     # Create a keyword list file
