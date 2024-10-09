@@ -15,25 +15,28 @@ class VideoPlayer:
         self.debug = debug
         self.rotation = rotation
         if not self.debug:
-            # Convert rotation to VLC video filter option
-            transform_filter = self._get_transform_filter(rotation)
-            
-            # Create a new Instance with the video filter
-            self.instance = vlc.Instance(f'--video-filter={transform_filter}', '--fullscreen')
+            self.instance = vlc.Instance('--fullscreen')
             self.player = self.instance.media_player_new()
             self.media = self.instance.media_new(str(video_path))
             self.player.set_media(self.media)
-            # self.player.video_set_transform_angle(rotation)
-    def _get_transform_filter(self, rotation):
-        if rotation == 90:
-            return 'transform{type=90}'
-        elif rotation == 180:
-            return 'transform{type=180}'
-        elif rotation == 270:
-            return 'transform{type=270}'
-        else:
-            return 'transform{type=0}'  # No rotation
-
+            
+            # Set video orientation
+            self._set_video_orient(rotation)
+    def _set_video_orient(self, rotation):
+        # VideoOrient values:
+        # 0: Normal (no rotation)
+        # 1: 90 degrees clockwise
+        # 2: 180 degrees
+        # 3: 90 degrees counterclockwise
+        orient_value = {
+            0: 0,
+            90: 1,
+            180: 2,
+            270: 3
+        }.get(rotation, 0)
+        
+        self.player.video_set_adjust_int(vlc.VideoAdjustOption.Enable, 1)
+        self.player.video_set_adjust_int(vlc.VideoAdjustOption.Rotate, orient_value)
     def play(self):
         if self.debug:
             print(f"DEBUG: Playing video: {self.video_path} (Rotation: {self.rotation}°)")
