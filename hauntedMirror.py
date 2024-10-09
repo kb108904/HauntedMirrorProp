@@ -1,6 +1,6 @@
 import os
 import sys
-from pocketsphinx import LiveSpeech, get_model_path
+from pocketsphinx import LiveSpeech
 import vlc
 from pathlib import Path
 import argparse
@@ -15,7 +15,7 @@ class VideoPlayer:
         self.debug = debug
         self.rotation = rotation
         if not self.debug:
-            self.instance = vlc.Instance('--fullscreen')
+            self.instance = vlc.Instance('--fullscreen --no-xlib --quiet --video-filter=transform --transform-type=vflip')
             self.player = self.instance.media_player_new()
             self.media = self.instance.media_new(str(video_path))
             self.player.set_media(self.media)
@@ -30,7 +30,7 @@ class VideoPlayer:
             270: vlc.VideoOrient.right_top
         }.get(rotation, vlc.VideoOrient.right_top)
         
-        self.player.VideoOrient(orient_value)
+        self.player.video_set_orient(orient_value)
 
     def play(self):
         if self.debug:
