@@ -1,6 +1,6 @@
 import os
 import sys
-from pocketsphinx import LiveSpeech
+from pocketsphinx import LiveSpeech, get_model_path
 import vlc
 from pathlib import Path
 import argparse
@@ -65,7 +65,7 @@ def main(args):
         "bloody video": lambda: play_video("blood"),
         "lady video": lambda: play_video("lady"),
         "press video": lambda: play_video("press"),
-        "EH G Z IH T  V IH D IY OW": sys.exit           #exit video
+        "exit video": sys.exit
     }
 
     # Create a keyword list file
@@ -73,7 +73,13 @@ def main(args):
         for command in commands.keys():
             f.write(f"{command.lower()} /1e-40/\n")
 
-    speech = LiveSpeech(kws='keywords.list')
+    speech = LiveSpeech(
+        kws='keywords.list',
+        sampling_rate=32000,  # optional
+        hmm=get_model_path('en-us'),
+        lm=get_model_path('en-us.lm.bin'),
+        dic=get_model_path('cmudict-en-us.dict')
+        )
     print("Listening for commands:")
     print("\n".join(commands.keys()))
     
