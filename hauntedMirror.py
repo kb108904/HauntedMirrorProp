@@ -16,9 +16,9 @@ class VideoPlayer:
         self.rotation = rotation
         if not self.debug:
              # Convert rotation to VLC video filter option
-            transform_filter = self._get_transform_filter(rotation)
+            # transform_filter = self._get_transform_filter(rotation)
 
-            self.instance = vlc.Instance(f'--video-filter={transform_filter}','--fullscreen')
+            self.instance = vlc.Instance('--no-xlib --quiet --video-filter=rotate --rotate-angle=90.0')
             self.player = self.instance.media_player_new()
             self.media = self.instance.media_new(str(video_path))
             self.player.set_media(self.media)
