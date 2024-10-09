@@ -10,18 +10,19 @@ print("Available audio devices:")
 print(sd.query_devices())
 
 class VideoPlayer:
-    def __init__(self, video_path, debug=False):
+    def __init__(self, video_path, debug=False, rotation=0 ):
         self.video_path = video_path
         self.debug = debug
         if not self.debug:
-            self.instance = vlc.Instance('--fullscreen --video-filter=rotate --rotate-angle=90.0')
+            self.instance = vlc.Instance('--fullscreen')
             self.player = self.instance.media_player_new()
             self.media = self.instance.media_new(str(video_path))
             self.player.set_media(self.media)
+            self.player.video_set_transform_angle(rotation)
 
     def play(self):
         if self.debug:
-            print(f"DEBUG: Playing video: {self.video_path}")
+            print(f"DEBUG: Playing video: {self.video_path} (Rotation: {self.rotation}°)")
         else:
             self.player.play()
 
@@ -40,28 +41,31 @@ class VideoPlayer:
 def main(args):
     
     videos = {
-        "blood": args.blood_video,
-        "lady": args.lady_video,
+        # "blood": args.blood_video,
+        # "lady": args.lady_video,
         # "press": args.press_video
+        "blood": VideoPlayer(args.blood_video, args.debug, rotation=90),
+        "lady": VideoPlayer(args.lady_video, args.debug, rotation=90),
     }
 
-    current_video = "blood"
-    player = VideoPlayer(videos[current_video], args.debug)
+    current_video = None
+    # player = VideoPlayer(videos[current_video], args.debug)
 
     def play_video(video_name):
-        nonlocal current_video, player
+        nonlocal current_video
         if video_name in videos:
+            if current_video:
+                videos[current_video].stop()
             current_video = video_name
-            player = VideoPlayer(videos[current_video], args.debug)
-            player.play()
+            videos[current_video].play()
             print(f"Playing: {current_video}")
         else:
             print(f"Video '{video_name}' not found.")
 
     # Define commands and their corresponding actions
     commands = {
-        "pause video": player.pause,
-        "stop video": player.stop,
+        "pause video": lambda: videos[current_video].pause() if current_video else print("No video is currently playing."),
+        "stop video": lambda: videos[current_video].stop() if current_video else print("No video is currently playing."),
         "bloody video": lambda: play_video("blood"),
         "lady video": lambda: play_video("lady"),
         "press video": lambda: play_video("press"),
