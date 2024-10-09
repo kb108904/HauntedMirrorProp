@@ -75,10 +75,7 @@ def main(args):
 
     speech = LiveSpeech(
         kws='keywords.list',
-        sampling_rate=16000,  # optional
-        hmm=get_model_path('en-us'),
-        lm=get_model_path('en-us.lm.bin'),
-        dic=get_model_path('cmudict-en-us.dict')
+        sampling_rate=16000
         )
     print("Listening for commands:")
     print("\n".join(commands.keys()))
