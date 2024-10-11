@@ -6,7 +6,6 @@ from pathlib import Path
 import argparse
 import sounddevice as sd
 import random
-import threading
 import numpy as np
 
 print("Available audio devices:")
@@ -41,10 +40,10 @@ class VideoPlayer:
             print(f"DEBUG: Restarting video: {self.video_path}")
         else:
             self.player.set_time(0)  # Set video to first frame
-            self.player.play()
+            self.player.stop()
 
     def on_end_reached(self, event):
-        self.stop()
+        self.player.stop()
         self.player.set_time(0)  # Set video to first frame
 
 def main(args):
@@ -57,7 +56,6 @@ def main(args):
 
     current_video = None
     current_random_video = None
-    sound_detected = False
 
     def play_video(video_name):
         nonlocal current_video, current_random_video
@@ -87,19 +85,6 @@ def main(args):
         current_random_video.play()
         print(f"Playing random video: {current_random_video.video_path}")
 
-    # def audio_callback(indata, frames, time, status):
-    #     nonlocal sound_detected
-    #     if np.max(np.abs(indata)) > 0.1:  # Adjust threshold as needed
-    #         sound_detected = True
-
-    # def monitor_audio():
-    #     with sd.InputStream(callback=audio_callback):
-    #         while True:
-    #             sd.sleep(1000)
-
-    # audio_thread = threading.Thread(target=monitor_audio, daemon=True)
-    # audio_thread.start()
-
     commands = {
         "stop video": lambda: (videos[current_video].stop() if current_video else (current_random_video.stop() if current_random_video else print("No video is currently playing."))),
         "exit video": exit,
@@ -120,26 +105,31 @@ def main(args):
     print("Listening for commands:")
     print("\n".join(commands.keys()))
 
-    for phrase in speech:
-        detected_phrase = str(phrase).lower()
-        print(f"Detected: {detected_phrase}")
+    # Sound detection setup
+    detection_threshold = 0.1  # Adjust this value as needed
+    detection_window = 1000  # 1 second window for sound detection
 
-        for command, action in commands.items():
-            if command in detected_phrase:
-                print(f"Executing command: {command}")
-                action()
-                break
+    with sd.InputStream(callback=None, channels=1, samplerate=16000, blocksize=16000):
+        for phrase in speech:
+            detected_phrase = str(phrase).lower()
+            print(f"Detected: {detected_phrase}")
 
-        if sound_detected:
-            if current_video:
-                videos[current_video].reset()
-                print(f"Sound detected, restarting video {current_video} from the first frame.")
-            elif current_random_video:
-                current_random_video.restart()
-                print(f"Sound detected, restarting random video from the first frame.")
-            else:
-                print("Sound detected, but no video is currently playing.")
-            sound_detected = False
+            for command, action in commands.items():
+                if command in detected_phrase:
+                    print(f"Executing command: {command}")
+                    action()
+                    break
+
+            # Sound detection
+            audio_data = sd.rec(detection_window, samplerate=16000, channels=1, blocking=True)
+            if np.max(np.abs(audio_data)) > detection_threshold:
+                print("Sound detected!")
+                if current_video:
+                    videos[current_video].reset()
+                    print(f"Restarting video {current_video} from the first frame.")
+                elif current_random_video:
+                    current_random_video.restart()
+                    print(f"Restarting random video from the first frame.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Voice-controlled video player")
