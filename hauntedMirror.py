@@ -41,7 +41,7 @@ class VideoPlayer:
             print(f"DEBUG: Restarting video: {self.video_path}")
         else:
             self.player.set_time(0)  # Set video to first frame
-            self.player.stop()
+            self.player.play()
 
     def on_end_reached(self, event):
         self.stop()
@@ -87,18 +87,18 @@ def main(args):
         current_random_video.play()
         print(f"Playing random video: {current_random_video.video_path}")
 
-    def audio_callback(indata, frames, time, status):
-        nonlocal sound_detected
-        if np.max(np.abs(indata)) > 0.1:  # Adjust threshold as needed
-            sound_detected = True
+    # def audio_callback(indata, frames, time, status):
+    #     nonlocal sound_detected
+    #     if np.max(np.abs(indata)) > 0.1:  # Adjust threshold as needed
+    #         sound_detected = True
 
-    def monitor_audio():
-        with sd.InputStream(callback=audio_callback):
-            while True:
-                sd.sleep(1000)
+    # def monitor_audio():
+    #     with sd.InputStream(callback=audio_callback):
+    #         while True:
+    #             sd.sleep(1000)
 
-    audio_thread = threading.Thread(target=monitor_audio, daemon=True)
-    audio_thread.start()
+    # audio_thread = threading.Thread(target=monitor_audio, daemon=True)
+    # audio_thread.start()
 
     commands = {
         "stop video": lambda: (videos[current_video].stop() if current_video else (current_random_video.stop() if current_random_video else print("No video is currently playing."))),
