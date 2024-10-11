@@ -7,6 +7,7 @@ import argparse
 import sounddevice as sd
 import random
 import threading
+import numpy as np
 
 print("Available audio devices:")
 print(sd.query_devices())
@@ -29,22 +30,17 @@ class VideoPlayer:
         else:
             self.player.play()
 
-    def pause(self):
-        if self.debug:
-            print(f"DEBUG: Pausing video: {self.video_path}")
-        else:
-            self.player.pause()
-    def rewindStop(self):
-        if self.debug:
-            print(f"DEBUG: rewind and stopping video: {self.video_path}")
-        else:
-            self.player.set_time(0) 
-            self.player.stop()
-
     def stop(self):
         if self.debug:
             print(f"DEBUG: Stopping video: {self.video_path}")
         else:
+            self.player.stop()
+
+    def reset(self):
+        if self.debug:
+            print(f"DEBUG: Restarting video: {self.video_path}")
+        else:
+            self.player.set_time(0)  # Set video to first frame
             self.player.stop()
 
     def on_end_reached(self, event):
@@ -60,34 +56,40 @@ def main(args):
     random_videos = [VideoPlayer(video_path, args.debug) for video_path in args.random_videos]
 
     current_video = None
+    current_random_video = None
     sound_detected = False
 
     def play_video(video_name):
-        nonlocal current_video
+        nonlocal current_video, current_random_video
         if video_name not in videos:
             print(f"Video '{video_name}' not found.")
             return
 
         if current_video:
             videos[current_video].stop()
+        if current_random_video:
+            current_random_video.stop()
 
         current_video = video_name
+        current_random_video = None
         videos[current_video].play()
         print(f"Playing: {current_video}")
 
     def play_random_video():
-        nonlocal current_video
+        nonlocal current_video, current_random_video
         if current_video:
             videos[current_video].stop()
+        if current_random_video:
+            current_random_video.stop()
 
-        player = random.choice(random_videos)
-        player.play()
-        current_video = "random"
-        print(f"Playing random video: {player.video_path}")
+        current_random_video = random.choice(random_videos)
+        current_video = None
+        current_random_video.play()
+        print(f"Playing random video: {current_random_video.video_path}")
 
     def audio_callback(indata, frames, time, status):
         nonlocal sound_detected
-        if numpy.max(indata) > 0.1:  # Adjust threshold as needed
+        if np.max(np.abs(indata)) > 0.1:  # Adjust threshold as needed
             sound_detected = True
 
     def monitor_audio():
@@ -99,8 +101,7 @@ def main(args):
     audio_thread.start()
 
     commands = {
-        "pause video": lambda: videos[current_video].pause() if current_video else print("No video is currently playing."),
-        "stop video": lambda: videos[current_video].stop() if current_video else print("No video is currently playing."),
+        "stop video": lambda: (videos[current_video].stop() if current_video else (current_random_video.stop() if current_random_video else print("No video is currently playing."))),
         "exit video": exit,
         "bloody video": lambda: play_video("blood"),
         "lady video": lambda: play_video("lady"),
@@ -129,13 +130,15 @@ def main(args):
                 action()
                 break
 
-        if sound_detected and current_video:
-            if current_video == "random":
-                for video in random_videos:
-                    video.rewindStop()
+        if sound_detected:
+            if current_video:
+                videos[current_video].reset()
+                print(f"Sound detected, restarting video {current_video} from the first frame.")
+            elif current_random_video:
+                current_random_video.restart()
+                print(f"Sound detected, restarting random video from the first frame.")
             else:
-                videos[current_video].rewindStop()
-            print("Sound detected, restarting video from the first frame.")
+                print("Sound detected, but no video is currently playing.")
             sound_detected = False
 
 if __name__ == "__main__":
