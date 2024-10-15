@@ -123,7 +123,8 @@ def main(args):
 
     # Start with a random video paused on the first frame
     current_random_video = random.choice(random_videos)
-    current_random_video.reset()
+    current_random_video.play()
+    current_random_video.pause()
     print(f"Initial video loaded and paused: {current_random_video.video_path}")
 
     print("Listening for commands:")
