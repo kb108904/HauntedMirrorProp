@@ -48,6 +48,12 @@ class VideoPlayer:
         else:
             self.player.stop()
 
+    def pause(self):
+        if self.debug:
+            print(f"DEBUG: Pausing video: {self.video_path}")
+        else:
+            self.player.pause()
+
     def reset(self):
         if self.debug:
             print(f"DEBUG: Restarting video: {self.video_path}")
@@ -114,6 +120,11 @@ def main(args):
         kws='keywords.list',
         sampling_rate=16000
     )
+
+    # Start with a random video paused on the first frame
+    current_random_video = random.choice(random_videos)
+    current_random_video.reset()
+    print(f"Initial video loaded and paused: {current_random_video.video_path}")
 
     print("Listening for commands:")
     print("\n".join(commands.keys()))
