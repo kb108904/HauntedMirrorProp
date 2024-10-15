@@ -4,27 +4,8 @@ from pocketsphinx import LiveSpeech
 import vlc
 from pathlib import Path
 import argparse
-import sounddevice as sd
 import random
 import numpy as np
-
-def list_audio_devices():
-    print("Available audio devices:")
-    devices = sd.query_devices()
-    for i, device in enumerate(devices):
-        print(f"  {i}: {device['name']}, (Inputs: {device['max_input_channels']}, Outputs: {device['max_output_channels']})")
-    return devices
-
-devices = list_audio_devices()
-
-# Try to find a suitable input device
-input_device = next((i for i, d in enumerate(devices) if d['max_input_channels'] > 0), None)
-
-if input_device is None:
-    print("No suitable input device found. Please check your audio settings.")
-    sys.exit(1)
-
-print(f"Using input device: {devices[input_device]['name']}")
 
 class VideoPlayer:
     def __init__(self, video_path, debug=False):
@@ -119,32 +100,16 @@ def main(args):
 
     print("Listening for commands:")
     print("\n".join(commands.keys()))
+    
+    for phrase in speech:
+        detected_phrase = str(phrase).lower()
+        print(f"Detected: {detected_phrase}")
 
-    # Sound detection setup
-    detection_threshold = 0.1  # Adjust this value as needed
-    detection_window = 1000  # 1 second window for sound detection
-
-    with sd.InputStream(device=input_device, channels=1, samplerate=16000, blocksize=16000):
-        for phrase in speech:
-            detected_phrase = str(phrase).lower()
-            print(f"Detected: {detected_phrase}")
-
-            for command, action in commands.items():
-                if command in detected_phrase:
-                    print(f"Executing command: {command}")
-                    action()
-                    break
-
-            # Sound detection
-            audio_data = sd.rec(detection_window, samplerate=16000, channels=1, device=input_device, blocking=True)
-            if np.max(np.abs(audio_data)) > detection_threshold:
-                print("Sound detected!")
-                if current_video:
-                    videos[current_video].reset()
-                    print(f"Restarting video {current_video} from the first frame.")
-                elif current_random_video:
-                    current_random_video.restart()
-                    print(f"Restarting random video from the first frame.")
+        for command, action in commands.items():
+            if command in detected_phrase:
+                print(f"Executing command: {command}")
+                action()
+                break
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Voice-controlled video player")
