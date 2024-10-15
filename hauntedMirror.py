@@ -13,8 +13,16 @@ def list_audio_devices():
     devices = sd.query_devices()
     for i, device in enumerate(devices):
         print(f"  {i}: {device['name']}, (Inputs: {device['max_input_channels']}, Outputs: {device['max_output_channels']})")
+    return devices
 
-list_audio_devices()
+devices = list_audio_devices()
+
+input_device = next((i for i, d in enumerate(devices) if d['max_input_channels'] > 0), None)
+
+if input_device is None:
+    print("No suitable input device found. Please check your audio settings.")
+    sys.exit(1)
+print(f"Using input device: {devices[input_device]['name']}")
 
 class VideoPlayer:
     def __init__(self, video_path, debug=False):
