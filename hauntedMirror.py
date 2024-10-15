@@ -6,6 +6,15 @@ from pathlib import Path
 import argparse
 import random
 import numpy as np
+import sounddevice as sd
+
+def list_audio_devices():
+    print("Available audio devices:")
+    devices = sd.query_devices()
+    for i, device in enumerate(devices):
+        print(f"  {i}: {device['name']}, (Inputs: {device['max_input_channels']}, Outputs: {device['max_output_channels']})")
+
+list_audio_devices()
 
 class VideoPlayer:
     def __init__(self, video_path, debug=False):
