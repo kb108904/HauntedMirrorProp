@@ -132,7 +132,7 @@ def main(args):
     def quit_app():
         print("Exiting the application...")
         stop_current_video()
-        exit()
+        exit
 
     commands = {
         "stop video": lambda: (videos[current_video].stop() if current_video else (current_random_video.stop() if current_random_video else print("No video is currently playing."))),
