@@ -7,7 +7,7 @@ import argparse
 import random
 import numpy as np
 import sounddevice as sd
-import msvcrt
+import keyboard
 
 def list_audio_devices():
     print("Available audio devices:")
@@ -148,11 +148,9 @@ def main(args):
     
     print("Press 'q' or 'Esc' to quit the application.")
 
-    def check_keyboard_input():
-        if msvcrt.kbhit():
-            key = msvcrt.getch()
-            return key in [b'q', b'\x1b']  # 'q' or Esc key
-        return False
+    # Set up keyboard event handler
+    keyboard.on_press_key('q', lambda _: quit_app())
+    keyboard.on_press_key('esc', lambda _: quit_app())
 
     speech_generator = iter(speech)
     
@@ -170,10 +168,10 @@ def main(args):
         except StopIteration:
             pass
 
-        if check_keyboard_input():
-            quit_app()
+        keyboard.read_key()  # This allows keyboard events to be processed
 
     print("Application has been closed.")
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Voice-controlled video player")
     parser.add_argument("--blood-video", type=Path, required=True, help="Path to the 'blood' video file")
