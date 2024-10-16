@@ -91,7 +91,6 @@ def main(args):
 
     current_video = None
     current_random_video = None
-    running = True
 
     def play_video(video_name):
         nonlocal current_video, current_random_video
@@ -131,10 +130,9 @@ def main(args):
             print("No video is currently playing.")
 
     def quit_app():
-        nonlocal running
         print("Exiting the application...")
         stop_current_video()
-        running = False
+        exit()
 
     commands = {
         "stop video": lambda: (videos[current_video].stop() if current_video else (current_random_video.stop() if current_random_video else print("No video is currently playing."))),
