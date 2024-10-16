@@ -84,15 +84,14 @@ def handle_speech(speech_generator, commands):
         except StopIteration:
             pass
 
+def quit_app_global():
+    global running
+    print("Exiting the application...")
+    running = False
 
 def signal_handler(sig, frame):
     global running
     print('Exiting the application...')
-    running = False
-
-def quit_app():
-    global running
-    print("Exiting the application...")
     running = False
 
 # Register the signal handler
@@ -145,6 +144,11 @@ def main(args):
             current_random_video.stop()
         else:
             print("No video is currently playing.")
+
+
+    def quit_app():
+        stop_current_video()
+        quit_app_global()
 
     commands = {
         "stop video": lambda: (videos[current_video].stop() if current_video else (current_random_video.stop() if current_random_video else print("No video is currently playing."))),
