@@ -123,7 +123,7 @@ def main(args):
 
     commands = {
         "stop video": lambda: (videos[current_video].stop() if current_video else (current_random_video.stop() if current_random_video else print("No video is currently playing."))),
-        "exit video": quit_app(),
+        "exit video": quit_app,
         "bloody video": lambda: play_video("blood"),
         "lady video": lambda: play_video("lady"),
         "random video": play_random_video,
