@@ -141,6 +141,7 @@ def main(args):
     # Start with a random video paused on the first frame
     current_random_video = random.choice(random_videos)
     current_random_video.play()
+    current_random_video.pause()
     print(f"Initial video loaded and paused: {current_random_video.video_path}")
 
     print("Listening for commands:")
@@ -149,8 +150,8 @@ def main(args):
     print("Press 'q' or 'Esc' to quit the application.")
 
     # Set up keyboard event handler
-    keyboard.on_press_key('q', lambda _: quit_app())
-    keyboard.on_press_key('esc', lambda _: quit_app())
+    keyboard.on_press_key('q', lambda _: play_random_video())
+    keyboard.on_press_key('esc', lambda _: play_random_video())
 
     speech_generator = iter(speech)
     
