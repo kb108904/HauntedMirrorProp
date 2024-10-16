@@ -67,8 +67,8 @@ class VideoPlayer:
             self.player.stop()
 
     def on_end_reached(self, event):
-        self.player.stop()
         self.player.set_time(0)  # Set video to first frame
+        self.player.stop()
 
 def handle_speech(speech_generator, commands):
     while True:
