@@ -7,8 +7,6 @@ import argparse
 import random
 import numpy as np
 import sounddevice as sd
-import threading
-import keyboard
 
 def list_audio_devices():
     print("Available audio devices:")
@@ -77,7 +75,6 @@ def main(args):
 
     current_video = None
     current_random_video = None
-    running = True
 
     def play_video(video_name):
         nonlocal current_video, current_random_video
@@ -117,14 +114,13 @@ def main(args):
             print("No video is currently playing.")
 
     def quit_app():
-        nonlocal running
         print("Exiting the application...")
         stop_current_video()
-        running = False
+        exit
 
     commands = {
         "stop video": lambda: (videos[current_video].stop() if current_video else (current_random_video.stop() if current_random_video else print("No video is currently playing."))),
-        "exit video": quit_app,
+        "exit video": quit_app(),
         "bloody video": lambda: play_video("blood"),
         "lady video": lambda: play_video("lady"),
         "random video": play_random_video,
@@ -146,32 +142,16 @@ def main(args):
 
     print("Listening for commands:")
     print("\n".join(commands.keys()))
-    print("Press 'q' or 'Esc' to quit the application.")
+    
+    for phrase in speech:
+        detected_phrase = str(phrase).lower()
+        print(f"Detected: {detected_phrase}")
 
-    def keyboard_listener():
-        nonlocal running
-        while running:
-            if keyboard.is_pressed('q') or keyboard.is_pressed('esc'):
-                quit_app()
-
-    # Start the keyboard listener in a separate thread
-    keyboard_thread = threading.Thread(target=keyboard_listener, daemon=True)
-    keyboard_thread.start()
-
-    while running:
-        for phrase in speech:
-            if not running:
+        for command, action in commands.items():
+            if command in detected_phrase:
+                print(f"Executing command: {command}")
+                action()
                 break
-            detected_phrase = str(phrase).lower()
-            print(f"Detected: {detected_phrase}")
-
-            for command, action in commands.items():
-                if command in detected_phrase:
-                    print(f"Executing command: {command}")
-                    action()
-                    break
-
-    print("Application has been closed.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Voice-controlled video player")
