@@ -8,6 +8,7 @@ import random
 import numpy as np
 import sounddevice as sd
 import keyboard
+import threading
 
 def list_audio_devices():
     print("Available audio devices:")
@@ -65,6 +66,20 @@ class VideoPlayer:
     def on_end_reached(self, event):
         self.player.stop()
         self.player.set_time(0)  # Set video to first frame
+
+def handle_speech(speech_generator, commands):
+    while True:
+        try:
+            phrase = next(speech_generator)
+            detected_phrase = str(phrase).lower()
+            print(f"Detected: {detected_phrase}")
+            for command, action in commands.items():
+                if command in detected_phrase:
+                    print(f"Executing command: {command}")
+                    action()
+                    break
+        except StopIteration:
+            pass
 
 def main(args):
     videos = {
@@ -155,21 +170,11 @@ def main(args):
 
     speech_generator = iter(speech)
     
-    while running:
-        try:
-            phrase = next(speech_generator)
-            detected_phrase = str(phrase).lower()
-            print(f"Detected: {detected_phrase}")
-
-            for command, action in commands.items():
-                if command in detected_phrase:
-                    print(f"Executing command: {command}")
-                    action()
-                    break
-        except StopIteration:
-            pass
-
-        keyboard.read_key()  # This allows keyboard events to be processed
+    speech_thread = threading.Thread(target=handle_speech, args=(speech_generator, commands))
+    speech_thread.daemon = True  # Ensures the thread ends when the main program exits
+    speech_thread.start()
+    
+    keyboard.read_key()  # This allows keyboard events to be processed
 
     print("Application has been closed.")
 
