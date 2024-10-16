@@ -91,6 +91,7 @@ def main(args):
 
     current_video = None
     current_random_video = None
+    running = True
 
     def play_video(video_name):
         nonlocal current_video, current_random_video
@@ -129,10 +130,13 @@ def main(args):
         else:
             print("No video is currently playing.")
 
+    exit_event = threading.Event()  # Event to signal exit
+
     def quit_app():
+        nonlocal running
         print("Exiting the application...")
         stop_current_video()
-        sys.exit(1)
+        running = False
 
     commands = {
         "stop video": lambda: (videos[current_video].stop() if current_video else (current_random_video.stop() if current_random_video else print("No video is currently playing."))),
@@ -172,7 +176,11 @@ def main(args):
     speech_thread.daemon = True  # Ensures the thread ends when the main program exits
     speech_thread.start()
     
-    keyboard.read_key()  # This allows keyboard events to be processed
+    while running:
+        try:
+            keyboard.read_key()  # This allows keyboard events to be processed
+        except:
+            pass
 
     print("Application has been closed.")
 
