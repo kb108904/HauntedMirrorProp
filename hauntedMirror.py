@@ -7,6 +7,7 @@ import argparse
 import random
 import numpy as np
 import sounddevice as sd
+import msvcrt
 
 def list_audio_devices():
     print("Available audio devices:")
@@ -75,6 +76,7 @@ def main(args):
 
     current_video = None
     current_random_video = None
+    running = True
 
     def play_video(video_name):
         nonlocal current_video, current_random_video
@@ -114,9 +116,10 @@ def main(args):
             print("No video is currently playing.")
 
     def quit_app():
+        nonlocal running
         print("Exiting the application...")
         stop_current_video()
-        exit
+        running = False
 
     commands = {
         "stop video": lambda: (videos[current_video].stop() if current_video else (current_random_video.stop() if current_random_video else print("No video is currently playing."))),
@@ -143,16 +146,34 @@ def main(args):
     print("Listening for commands:")
     print("\n".join(commands.keys()))
     
-    for phrase in speech:
-        detected_phrase = str(phrase).lower()
-        print(f"Detected: {detected_phrase}")
+    print("Press 'q' or 'Esc' to quit the application.")
 
-        for command, action in commands.items():
-            if command in detected_phrase:
-                print(f"Executing command: {command}")
-                action()
-                break
+    def check_keyboard_input():
+        if msvcrt.kbhit():
+            key = msvcrt.getch()
+            return key in [b'q', b'\x1b']  # 'q' or Esc key
+        return False
 
+    speech_generator = iter(speech)
+    
+    while running:
+        try:
+            phrase = next(speech_generator)
+            detected_phrase = str(phrase).lower()
+            print(f"Detected: {detected_phrase}")
+
+            for command, action in commands.items():
+                if command in detected_phrase:
+                    print(f"Executing command: {command}")
+                    action()
+                    break
+        except StopIteration:
+            pass
+
+        if check_keyboard_input():
+            quit_app()
+
+    print("Application has been closed.")
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Voice-controlled video player")
     parser.add_argument("--blood-video", type=Path, required=True, help="Path to the 'blood' video file")
