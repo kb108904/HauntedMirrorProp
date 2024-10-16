@@ -150,8 +150,8 @@ def main(args):
     print("Press 'q' or 'Esc' to quit the application.")
 
     # Set up keyboard event handler
-    keyboard.on_press_key('q', lambda _: play_random_video())
-    keyboard.on_press_key('esc', lambda _: play_random_video())
+    keyboard.on_press_key('q', lambda _: quit_app())
+    keyboard.on_press_key('esc', lambda _: quit_app())
 
     speech_generator = iter(speech)
     
