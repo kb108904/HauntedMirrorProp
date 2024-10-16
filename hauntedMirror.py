@@ -93,7 +93,6 @@ def signal_handler(sig, frame):
 def quit_app():
     global running
     print("Exiting the application...")
-    stop_current_video()
     running = False
 
 # Register the signal handler
