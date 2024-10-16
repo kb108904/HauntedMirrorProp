@@ -90,6 +90,12 @@ def signal_handler(sig, frame):
     print('Exiting the application...')
     running = False
 
+def quit_app():
+    global running
+    print("Exiting the application...")
+    stop_current_video()
+    running = False
+
 # Register the signal handler
 signal.signal(signal.SIGINT, signal_handler)
 
@@ -140,14 +146,6 @@ def main(args):
             current_random_video.stop()
         else:
             print("No video is currently playing.")
-
-    exit_event = threading.Event()  # Event to signal exit
-
-    def quit_app():
-        global running
-        print("Exiting the application...")
-        stop_current_video()
-        running = False
 
     commands = {
         "stop video": lambda: (videos[current_video].stop() if current_video else (current_random_video.stop() if current_random_video else print("No video is currently playing."))),
