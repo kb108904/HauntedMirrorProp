@@ -7,8 +7,11 @@ import argparse
 import random
 import numpy as np
 import sounddevice as sd
-import keyboard
 import threading
+import signal
+import sys
+
+running = True
 
 def list_audio_devices():
     print("Available audio devices:")
@@ -81,6 +84,15 @@ def handle_speech(speech_generator, commands):
         except StopIteration:
             pass
 
+
+def signal_handler(sig, frame):
+    global running
+    print('Exiting the application...')
+    running = False
+
+# Register the signal handler
+signal.signal(signal.SIGINT, signal_handler)
+
 def main(args):
     videos = {
         "blood": VideoPlayer(args.blood_video, args.debug),
@@ -91,7 +103,6 @@ def main(args):
 
     current_video = None
     current_random_video = None
-    running = True
 
     def play_video(video_name):
         nonlocal current_video, current_random_video
@@ -133,7 +144,7 @@ def main(args):
     exit_event = threading.Event()  # Event to signal exit
 
     def quit_app():
-        nonlocal running
+        global running
         print("Exiting the application...")
         stop_current_video()
         running = False
@@ -163,12 +174,6 @@ def main(args):
 
     print("Listening for commands:")
     print("\n".join(commands.keys()))
-    
-    print("Press 'q' or 'Esc' to quit the application.")
-
-    # Set up keyboard event handler
-    keyboard.on_press_key('q', lambda _: quit_app())
-    keyboard.on_press_key('esc', lambda _: quit_app())
 
     speech_generator = iter(speech)
     
@@ -176,10 +181,11 @@ def main(args):
     speech_thread.daemon = True  # Ensures the thread ends when the main program exits
     speech_thread.start()
     
+    print("Press 'Ctrl+C' to quit the application.")
+    global running
     while running:
         try:
-            if keyboard.is_pressed('q') or keyboard.is_pressed('esc'):
-                quit_app()  # Quit if 'q' or 'esc' is pressed
+            pass
         except:
             pass
 
