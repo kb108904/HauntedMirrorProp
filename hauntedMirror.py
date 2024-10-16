@@ -178,7 +178,8 @@ def main(args):
     
     while running:
         try:
-            keyboard.read_key()  # This allows keyboard events to be processed
+            if keyboard.is_pressed('q') or keyboard.is_pressed('esc'):
+                quit_app()  # Quit if 'q' or 'esc' is pressed
         except:
             pass
 
