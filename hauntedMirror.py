@@ -1,4 +1,5 @@
 import os
+import queue
 import sys
 from pocketsphinx import LiveSpeech
 import vlc
@@ -10,6 +11,7 @@ import sounddevice as sd
 import threading
 import signal
 import sys
+import time
 
 running = True
 
@@ -34,7 +36,7 @@ class VideoPlayer:
         self.video_path = video_path
         self.debug = debug
         if not self.debug:
-            self.instance = vlc.Instance('--no-audio', '--quiet')
+            self.instance = vlc.Instance('--no-audio', '--quiet','--play-and-exit')
             self.player = self.instance.media_player_new()
             self.media = self.instance.media_new(str(video_path))
             self.player.set_media(self.media)
@@ -45,32 +47,49 @@ class VideoPlayer:
         if self.debug:
             print(f"DEBUG: Playing video: {self.video_path}")
         else:
+            time.sleep(0.25)
             self.player.play()
 
     def stop(self):
-        if self.debug:
-            print(f"DEBUG: Stopping video: {self.video_path}")
+        # Check player state before stopping
+        state = self.player.get_state()
+        if state in (vlc.State.Playing, vlc.State.Paused):
+            if self.debug:
+                print(f"DEBUG: Stopping video: {self.video_path}")
+            else:
+                time.sleep(0.25)
+                self.player.stop()
+                print(f"Video stopped: {self.video_path}")
         else:
-            self.player.stop()
+            print("Video is not currently playing or paused.")
 
     def pause(self):
         if self.debug:
             print(f"DEBUG: Pausing video: {self.video_path}")
         else:
+            time.sleep(0.25)
             self.player.pause()
 
     def reset(self):
-        if self.debug:
-            print(f"DEBUG: Restarting video: {self.video_path}")
+        state = self.player.get_state()
+        if state in (vlc.State.Playing, vlc.State.Paused, vlc.State.Ended):
+            if self.debug:
+                print(f"DEBUG: Restarting video: {self.video_path}")
+            else:
+                time.sleep(0.25)
+                # self.player.stop()  # Stop the video completely
+                # self.player.set_position(0.0)  # Set the video to the first frame
+                # self.player.set_time(0.0)
+                self.player.play()  # Play again from the first frame
+                self.player.pause()  # Pause immediately, so it's reset but not playing
+                print(f"Video reset to start: {self.video_path}")
         else:
-            self.player.set_time(0)  # Set video to first frame
-            self.player.stop()
+            print("Video is not in a valid state to reset.")
 
     def on_end_reached(self, event):
-        self.player.set_time(0)  # Set video to first frame
-        self.player.stop()
+        self.reset()
 
-def handle_speech(speech_generator, commands):
+def handle_speech(speech_generator, commands, command_queue):
     while True:
         try:
             phrase = next(speech_generator)
@@ -78,8 +97,8 @@ def handle_speech(speech_generator, commands):
             print(f"Detected: {detected_phrase}")
             for command, action in commands.items():
                 if command in detected_phrase:
-                    print(f"Executing command: {command}")
-                    action()
+                    print(f"queueing command: {command}")
+                    command_queue.put(lambda: action())
                     break
         except StopIteration:
             pass
@@ -148,10 +167,11 @@ def main(args):
 
     def quit_app():
         stop_current_video()
+        time.sleep(1)
         quit_app_global()
 
     commands = {
-        "stop video": lambda: (videos[current_video].stop() if current_video else (current_random_video.stop() if current_random_video else print("No video is currently playing."))),
+        "stop video": stop_current_video,
         "exit video": quit_app,
         "bloody video": lambda: play_video("blood"),
         "lady video": lambda: play_video("lady"),
@@ -168,17 +188,15 @@ def main(args):
     )
 
     # Start with a random video paused on the first frame
-    current_random_video = random.choice(random_videos)
-    current_random_video.play()
-    current_random_video.pause()
-    print(f"Initial video loaded and paused: {current_random_video.video_path}")
+    # play_random_video()
 
     print("Listening for commands:")
     print("\n".join(commands.keys()))
 
     speech_generator = iter(speech)
+    command_queue = queue.Queue()
     
-    speech_thread = threading.Thread(target=handle_speech, args=(speech_generator, commands))
+    speech_thread = threading.Thread(target=handle_speech, args=(speech_generator, commands, command_queue))
     speech_thread.daemon = True  # Ensures the thread ends when the main program exits
     speech_thread.start()
     
@@ -186,10 +204,12 @@ def main(args):
     global running
     while running:
         try:
-            pass
-        except:
-            pass
-
+            if not command_queue.empty():
+                action = command_queue.get(timeout=1)
+                action()
+                time.sleep(1)
+        except Exception as e:
+            print(f"Error executing command: {e}")
     print("Application has been closed.")
 
 if __name__ == "__main__":
