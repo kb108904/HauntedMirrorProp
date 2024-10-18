@@ -190,7 +190,7 @@ def main(args):
 
     speech = LiveSpeech(
         kws='keywords.list',
-        sampling_rate=32000
+        sampling_rate=48000
     )
 
     # Start with a random video paused on the first frame
