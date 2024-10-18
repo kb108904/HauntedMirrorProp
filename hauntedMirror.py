@@ -40,8 +40,8 @@ class VideoPlayer:
             self.player = self.instance.media_player_new()
             self.media = self.instance.media_new(str(video_path))
             self.player.set_media(self.media)
-            self.event_manager = self.player.event_manager()
-            self.event_manager.event_attach(vlc.EventType.MediaPlayerEndReached, self.on_end_reached)
+            # self.event_manager = self.player.event_manager()
+            # self.event_manager.event_attach(vlc.EventType.MediaPlayerEndReached, self.on_end_reached)
 
     def play(self):
         if self.debug:
@@ -102,11 +102,17 @@ def handle_speech(speech_generator, commands, command_queue):
                     break
         except StopIteration:
             pass
+        except Exception as e:
+            if running:
+                print(f"Error in handle_speech: {e}")
+                break
 
-def quit_app_global():
+def quit_app_global(speech_thread):
     global running
     print("Exiting the application...")
     running = False
+    if speech_thread.is_alive():
+        speech_thread.join()  # Wait for the thread to finish
 
 def signal_handler(sig, frame):
     global running
@@ -168,7 +174,7 @@ def main(args):
     def quit_app():
         stop_current_video()
         time.sleep(1)
-        quit_app_global()
+        quit_app_global(speech_thread)
 
     commands = {
         "stop video": stop_current_video,
@@ -184,7 +190,7 @@ def main(args):
 
     speech = LiveSpeech(
         kws='keywords.list',
-        sampling_rate=16000
+        sampling_rate=32000
     )
 
     # Start with a random video paused on the first frame
