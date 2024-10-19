@@ -235,7 +235,7 @@ def main(args):
     print("Listening for commands:")
     print("\n".join(commands.keys()))
 
-    with sd.Stream(device=input_device, samplerate=16000, channels=1, callback=audio_callback):
+    with sd.Stream(device=input_device, samplerate=48000, channels=1, callback=audio_callback):
         print("Press 'Ctrl+C' to quit the application.")
         global running
         while running:
