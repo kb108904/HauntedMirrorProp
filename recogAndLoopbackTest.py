@@ -128,9 +128,9 @@ def process_audio(ps, commands, command_queue):
             audio_chunk = audio_queue.get(timeout=1)
             ps.process_raw(audio_chunk, False, False)
             if ps.get_in_speech():
-                hyp = ps.get_hyp()
+                hyp = ps.hypothesis()
                 if hyp is not None:
-                    detected_phrase = hyp.hypstr.lower()
+                    detected_phrase = hyp.lower()
                     print(f"Detected: {detected_phrase}")
                     for command, action in commands.items():
                         if command in detected_phrase:
