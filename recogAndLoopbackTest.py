@@ -23,12 +23,24 @@ def list_audio_devices():
 
 devices = list_audio_devices()
 
-input_device = next((i for i, d in enumerate(devices) if d['max_input_channels'] > 0), None)
+def select_device(devices, is_input=True):
+    device_type = "input" if is_input else "output"
+    while True:
+        try:
+            index = int(input(f"Select {device_type} device number: "))
+            if 0 <= index < len(devices):
+                if (is_input and devices[index]['max_input_channels'] > 0) or \
+                   (not is_input and devices[index]['max_output_channels'] > 0):
+                    return index
+            print(f"Invalid selection. Please choose a valid {device_type} device.")
+        except ValueError:
+            print("Please enter a number.")
 
-if input_device is None:
-    print("No suitable input device found. Please check your audio settings.")
-    sys.exit(1)
+input_device = select_device(devices, is_input=True)
+output_device = select_device(devices, is_input=False)
+
 print(f"Using input device: {devices[input_device]['name']}")
+print(f"Using output device: {devices[output_device]['name']}")
 
 class VideoPlayer:
     def __init__(self, video_path, debug=False):
