@@ -125,9 +125,9 @@ def process_audio(ps, commands, command_queue):
     global running
     while running:
         try:
-            audio_chunk = audio_queue.get(timeout=1)
-            ps.process_raw(audio_chunk, False, False)
-            if ps.is_speech():
+            audio_chunk = audio_queue.get(timeout=5)
+            if audio_chunk:
+                ps.process_raw(audio_chunk, False, False)
                 hyp = ps.hypothesis()
                 if hyp is not None:
                     detected_phrase = hyp.lower()
@@ -211,6 +211,7 @@ def main(args):
     ps = Pocketsphinx(
         # hmm=os.path.join(model_path, 'en-us'),
         # dict=os.path.join(model_path, 'cmudict-en-us.dict')
+        verbose=True
     )
 
     # Create keyword list file
@@ -226,7 +227,8 @@ def main(args):
     global audio_queue
     audio_queue = queue.Queue()
 
-    ps.start_utt()
+    ps.decode()
+    # ps.start_utt()
 
     audio_thread = threading.Thread(target=process_audio, args=(ps, commands, command_queue))
     audio_thread.daemon = True
@@ -241,7 +243,7 @@ def main(args):
         while running:
             try:
                 if not command_queue.empty():
-                    action = command_queue.get(timeout=1)
+                    action = command_queue.get(timeout=5)
                     action()
                     time.sleep(1)
             except Exception as e:
