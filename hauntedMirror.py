@@ -119,7 +119,7 @@ def quit_app_global(speech_thread):
 
 def signal_handler(sig, frame):
     global running
-    print('Exiting the application...')
+    print('sExiting the application...')
     running = False
 
 # Register the signal handler
@@ -173,12 +173,6 @@ def main(args):
         else:
             print("No video is currently playing.")
 
-
-    def quit_app():
-        stop_current_video()
-        time.sleep(1)
-        quit_app_global(speech_thread)
-
     commands = {
         "stop video": stop_current_video,
         "exit video": quit_app,
@@ -209,6 +203,11 @@ def main(args):
     speech_thread.daemon = True  # Ensures the thread ends when the main program exits
     speech_thread.start()
     
+    def quit_app():
+        stop_current_video()
+        time.sleep(1)
+        quit_app_global(speech_thread)
+
     print("Press 'Ctrl+C' to quit the application.")
     global running
     while running:
