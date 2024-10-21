@@ -36,7 +36,7 @@ class VideoPlayer:
         self.video_path = video_path
         self.debug = debug
         if not self.debug:
-            self.instance = vlc.Instance('--no-audio', '--quiet','--play-and-exit')
+            self.instance = vlc.Instance('--quiet')
             self.player = self.instance.media_player_new()
             self.media = self.instance.media_new(str(video_path))
             self.player.set_media(self.media)
@@ -211,9 +211,8 @@ def main(args):
     while running:
         try:
             if not command_queue.empty():
-                action = command_queue.get(timeout=1)
+                action = command_queue.get(timeout=3)
                 action()
-                time.sleep(1)
         except Exception as e:
             print(f"Error executing command: {e}")
     print("Application has been closed.")
