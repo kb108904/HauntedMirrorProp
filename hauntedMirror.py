@@ -36,7 +36,7 @@ class VideoPlayer:
         self.video_path = video_path
         self.debug = debug
         if not self.debug:
-            self.instance = vlc.Instance('--quiet')
+            self.instance = vlc.Instance('--quiet', '--verbose=2')
             self.player = self.instance.media_player_new()
             self.media = self.instance.media_new(str(video_path))
             self.player.set_media(self.media)
@@ -214,7 +214,7 @@ def main(args):
     while running:
         try:
             if not command_queue.empty():
-                action = command_queue.get(timeout=3)
+                action = command_queue.get(timeout=1)
                 action()
             else:
                 # Check if the current video has ended
