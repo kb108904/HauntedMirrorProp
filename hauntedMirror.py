@@ -40,8 +40,8 @@ class VideoPlayer:
             self.player = self.instance.media_player_new()
             self.media = self.instance.media_new(str(video_path))
             self.player.set_media(self.media)
-            # self.event_manager = self.player.event_manager()
-            # self.event_manager.event_attach(vlc.EventType.MediaPlayerEndReached, self.on_end_reached)
+            self.event_manager = self.player.event_manager()
+            self.event_manager.event_attach(vlc.EventType.MediaPlayerEndReached, self.on_end_reached)
 
     def play(self):
         if self.debug:
@@ -88,6 +88,9 @@ class VideoPlayer:
 
     def on_end_reached(self, event):
         self.reset()
+    
+    def is_playing(self):
+        return self.player.get_state() in (vlc.State.Playing, vlc.State.Paused)
 
 def handle_speech(speech_generator, commands, command_queue):
     while True:
@@ -213,6 +216,15 @@ def main(args):
             if not command_queue.empty():
                 action = command_queue.get(timeout=3)
                 action()
+            else:
+                # Check if the current video has ended
+                if current_video and not videos[current_video].is_playing():
+                    print(f"Video '{current_video}' has ended.")
+                    current_video = None
+                elif current_random_video and not current_random_video.is_playing():
+                    print(f"Random video has ended.")
+                    current_random_video = None
+                time.sleep(0.5)  # Small delay to prevent excessive CPU usage
         except Exception as e:
             print(f"Error executing command: {e}")
     print("Application has been closed.")
