@@ -68,12 +68,17 @@ class VideoPlayer:
 
     def release(self): 
         if self.currently_playing:
-            self.instance = vlc.Instance('--fullscreen', '--quiet')
-            self.player = self.instance.media_player_new()
-            self.media = self.instance.media_new(str(video_path))
-            self.player.set_media(self.media)
-            self.event_manager = self.player.event_manager()
-            self.event_manager.event_attach(vlc.EventType.MediaPlayerEndReached, self.handle_media_state_changed)
+            print("Cleaning up player resources...")
+            # Stop and release resources
+            self.player.stop()
+            self.media.release()
+            self.player.release()
+            self.instance.release()
+            self.currently_playing = False
+            # self.instance = None
+            # self.player = None
+            self.media = None
+            print("Player resources released")
 
     def pause(self):
         if self.debug:
