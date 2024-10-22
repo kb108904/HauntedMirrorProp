@@ -69,9 +69,10 @@ class VideoPlayer:
         print("Cleaning up player resources...")
         # Stop and release resources
         self.player.stop()
-        self.media.release()
+        # self.media.release()
         self.media = None
         time.sleep(0.25)
+        self.media = self.instance.media_new(str(video_path))
         self.player.set_media(self.media)
         print("Player resources released")
 
@@ -189,7 +190,7 @@ def main(args):
     commands = {
         "stop video": stop_current_video,
         "exit video": quit_app,
-        "bloody video": lambda: play_video("blood"),
+        "bloody mary bloody mary": lambda: play_video("blood"),
         "lady video": lambda: play_video("lady"),
         "random video": play_random_video,
     }
