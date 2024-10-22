@@ -213,6 +213,7 @@ def main(args):
             if not command_queue.empty():
                 action = command_queue.get(timeout=1)
                 action()
+                time.sleep(1)
             else:
                 # Check if the current video has ended
                 if current_video and not videos[current_video].is_playing():
