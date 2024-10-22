@@ -110,12 +110,10 @@ def handle_speech(speech_generator, commands, command_queue):
                 print(f"Error in handle_speech: {e}")
                 break
 
-def quit_app_global(speech_thread):
+def quit_app_global():
     global running
     print("Exiting the application...")
     running = False
-    if speech_thread.is_alive():
-        speech_thread.join()  # Wait for the thread to finish
 
 def signal_handler(sig, frame):
     global running
@@ -176,7 +174,7 @@ def main(args):
     def quit_app():
         stop_current_video()
         time.sleep(1)
-        quit_app_global(speech_thread)
+        quit_app_global()
 
     commands = {
         "stop video": stop_current_video,
