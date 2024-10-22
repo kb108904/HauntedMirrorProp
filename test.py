@@ -1,9 +1,16 @@
 import vlc
 import time
 import sys
+import signal
+import threading
 
 class VideoTest:
     def __init__(self, video_path):
+        self.video_path = video_path
+        self.running = True
+        self.currently_playing = False
+        
+    def setup_player(self):
         # Create a VLC instance
         self.instance = vlc.Instance('--quiet')
         
@@ -11,42 +18,62 @@ class VideoTest:
         self.player = self.instance.media_player_new()
         
         # Create a Media object and set it to the player
-        self.media = self.instance.media_new(video_path)
+        self.media = self.instance.media_new(self.video_path)
         self.player.set_media(self.media)
-        
-        # Flag to track if video has ended
-        self.finished = False
         
         # Set up the event manager
         self.event_manager = self.media.event_manager()
         self.event_manager.event_attach(vlc.EventType.MediaStateChanged, self.handle_media_state_changed)
+        
+        self.currently_playing = True
 
     def handle_media_state_changed(self, event):
         # Check if the media has reached the end
         if self.player.get_state() == vlc.State.Ended:
             print("Video playback completed")
-            self.finished = True
+            self.cleanup_player()
 
-    def play(self):
-        print("Starting video playback...")
+    def cleanup_player(self):
+        if self.currently_playing:
+            print("Cleaning up player resources...")
+            self.player.stop()
+            self.media.release()
+            self.player.release()
+            self.instance.release()
+            self.currently_playing = False
+            print("Player resources released")
+
+    def play_video(self):
+        print("\nStarting video playback...")
+        self.setup_player()
         self.player.play()
         
         # Wait until playback starts
         time.sleep(1)
+
+    def signal_handler(self, signum, frame):
+        print("\nReceived signal to terminate...")
+        self.running = False
+        self.cleanup_player()
+
+    def run(self):
+        # Set up signal handling
+        signal.signal(signal.SIGINT, self.signal_handler)
+        signal.signal(signal.SIGTERM, self.signal_handler)
+
+        print("Press Ctrl+C to exit")
         
-        # Wait while video is playing
-        while not self.finished and self.player.is_playing():
-            time.sleep(0.5)
-        
-        # Ensure the player is properly stopped
-        self.player.stop()
-        print("Video player stopped")
-        
-        # Release resources
-        self.media.release()
-        self.player.release()
-        self.instance.release()
-        print("Resources released")
+        try:
+            while self.running:
+                if not self.currently_playing:
+                    self.play_video()
+                time.sleep(0.5)
+                
+        except Exception as e:
+            print(f"Error occurred: {e}")
+        finally:
+            self.cleanup_player()
+            print("Application terminated")
 
 def main():
     if len(sys.argv) != 2:
@@ -54,13 +81,8 @@ def main():
         sys.exit(1)
         
     video_path = sys.argv[1]
-    try:
-        player = VideoTest(video_path)
-        player.play()
-    except Exception as e:
-        print(f"Error occurred: {e}")
-    
-    print("Script completed")
+    player = VideoTest(video_path)
+    player.run()
 
 if __name__ == "__main__":
     main()

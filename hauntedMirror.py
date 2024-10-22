@@ -62,8 +62,10 @@ class VideoPlayer:
             print("Video is not currently playing or paused.")
     
     def release(self, event):
+        self.media.release()
         self.player.release()
         self.instance.release()
+        print("Resources released")
 
     def pause(self):
         if self.debug:
