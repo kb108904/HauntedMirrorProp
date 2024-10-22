@@ -35,13 +35,14 @@ class VideoPlayer:
     def __init__(self, video_path, debug=False):
         self.video_path = video_path
         self.debug = debug
+        self.currently_playing = True
         if not self.debug:
             self.instance = vlc.Instance('--fullscreen', '--quiet')
             self.player = self.instance.media_player_new()
             self.media = self.instance.media_new(str(video_path))
             self.player.set_media(self.media)
             self.event_manager = self.player.event_manager()
-            self.event_manager.event_attach(vlc.EventType.MediaPlayerEndReached, self.release)
+            self.event_manager.event_attach(vlc.EventType.MediaPlayerEndReached, self.handle_media_state_changed)
 
     def play(self):
         if self.debug:
@@ -60,12 +61,23 @@ class VideoPlayer:
                 print(f"Video stopped: {self.video_path}")
         else:
             print("Video is not currently playing or paused.")
-    
-    def release(self, event):
-        self.media.release()
-        self.player.release()
-        self.instance.release()
-        print("Resources released")
+
+    def handle_media_state_changed(self, event):
+        # Schedule cleanup to happen in the main thread
+        threading.Timer(0.1, self.release).start()
+
+    def release(self): 
+        if self.currently_playing:
+            print("Cleaning up player resources...")
+            # Force video window to close by setting video output to None
+            self.player.set_hwnd(None)
+            # Stop and release resources
+            self.player.stop()
+            self.media.release()
+            self.player.release()
+            self.instance.release()
+            self.currently_playing = False
+            print("Player resources released")
 
     def pause(self):
         if self.debug:
