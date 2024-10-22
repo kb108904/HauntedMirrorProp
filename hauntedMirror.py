@@ -35,7 +35,6 @@ class VideoPlayer:
     def __init__(self, video_path, debug=False):
         self.video_path = video_path
         self.debug = debug
-        self.currently_playing = True
         if not self.debug:
             self.instance = vlc.Instance('--fullscreen', '--quiet')
             self.player = self.instance.media_player_new()
@@ -67,18 +66,14 @@ class VideoPlayer:
         threading.Timer(0.1, self.release).start()
 
     def release(self): 
-        if self.currently_playing:
-            print("Cleaning up player resources...")
-            # Stop and release resources
-            self.player.stop()
-            self.media.release()
-            self.player.release()
-            self.instance.release()
-            self.currently_playing = False
-            # self.instance = None
-            # self.player = None
-            self.media = None
-            print("Player resources released")
+        print("Cleaning up player resources...")
+        # Stop and release resources
+        self.player.stop()
+        self.media.release()
+        self.media = None
+        time.sleep(0.25)
+        self.player.set_media(self.media)
+        print("Player resources released")
 
     def pause(self):
         if self.debug:
