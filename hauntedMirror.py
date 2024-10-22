@@ -36,7 +36,7 @@ class VideoPlayer:
         self.video_path = video_path
         self.debug = debug
         if not self.debug:
-            self.instance = vlc.Instance('--quiet', '--verbose=2')
+            self.instance = vlc.Instance('--fullscreen', '--quiet')
             self.player = self.instance.media_player_new()
             self.media = self.instance.media_new(str(video_path))
             self.player.set_media(self.media)
@@ -47,7 +47,6 @@ class VideoPlayer:
         if self.debug:
             print(f"DEBUG: Playing video: {self.video_path}")
         else:
-            time.sleep(0.25)
             self.player.play()
 
     def stop(self):
@@ -57,7 +56,6 @@ class VideoPlayer:
             if self.debug:
                 print(f"DEBUG: Stopping video: {self.video_path}")
             else:
-                time.sleep(0.25)
                 self.player.stop()
                 print(f"Video stopped: {self.video_path}")
         else:
@@ -66,8 +64,7 @@ class VideoPlayer:
     def pause(self):
         if self.debug:
             print(f"DEBUG: Pausing video: {self.video_path}")
-        else:
-            time.sleep(0.25)
+        else:            
             self.player.pause()
 
     def reset(self):
@@ -76,7 +73,6 @@ class VideoPlayer:
             if self.debug:
                 print(f"DEBUG: Restarting video: {self.video_path}")
             else:
-                time.sleep(0.25)
                 # self.player.stop()  # Stop the video completely
                 # self.player.set_position(0.0)  # Set the video to the first frame
                 # self.player.set_time(0.0)
