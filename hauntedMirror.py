@@ -63,7 +63,7 @@ class VideoPlayer:
     
     def release(self, event):
         self.player.release()
-        # self.instance.release()
+        self.instance.release()
 
     def pause(self):
         if self.debug:
