@@ -41,7 +41,7 @@ class VideoPlayer:
             self.media = self.instance.media_new(str(video_path))
             self.player.set_media(self.media)
             self.event_manager = self.player.event_manager()
-            self.event_manager.event_attach(vlc.EventType.MediaPlayerEndReached, self.relese)
+            self.event_manager.event_attach(vlc.EventType.MediaPlayerEndReached, self.release)
 
     def play(self):
         if self.debug:
@@ -61,7 +61,7 @@ class VideoPlayer:
         else:
             print("Video is not currently playing or paused.")
     
-    def relese(self):
+    def release(self, event):
         self.player.release()
         # self.instance.release()
 
