@@ -38,10 +38,14 @@ class VideoPlayer:
         if not self.debug:
             self.instance = vlc.Instance('--fullscreen', '--quiet')
             self.player = self.instance.media_player_new()
-            self.media = self.instance.media_new(str(video_path))
+            self.media = self._create_new_media()
             self.player.set_media(self.media)
             self.event_manager = self.player.event_manager()
             self.event_manager.event_attach(vlc.EventType.MediaPlayerEndReached, self.handle_media_state_changed)
+
+    def _create_new_media(self):
+        """Helper method to create a new media instance from the video path."""
+        return self.instance.media_new(str(self.video_path))
 
     def play(self):
         if self.debug:
@@ -50,7 +54,6 @@ class VideoPlayer:
             self.player.play()
 
     def stop(self):
-        # Check player state before stopping
         state = self.player.get_state()
         if state in (vlc.State.Playing, vlc.State.Paused):
             if self.debug:
@@ -62,19 +65,32 @@ class VideoPlayer:
             print("Video is not currently playing or paused.")
 
     def handle_media_state_changed(self, event):
-        # Schedule cleanup to happen in the main thread
         threading.Timer(0.1, self.release).start()
 
-    def release(self): 
+    def release(self):
+        """
+        Properly clean up and reset the media player resources.
+        This method ensures that the media is properly released and reset
+        to its original state for future playback.
+        """
         print("Cleaning up player resources...")
-        # Stop and release resources
+        
+        # Stop playback first
         self.player.stop()
-        # self.media.release()
-        self.media = None
+        
+        # Release the current media
+        if self.media is not None:
+            self.media.release()
+            self.media = None
+        
+        # Small delay to ensure proper cleanup
         time.sleep(0.25)
-        self.media = self.instance.media_new(str(video_path))
+        
+        # Create and set new media instance
+        self.media = self._create_new_media()
         self.player.set_media(self.media)
-        print("Player resources released")
+        
+        print(f"Player resources released and reset for: {self.video_path}")
 
     def pause(self):
         if self.debug:
@@ -88,11 +104,8 @@ class VideoPlayer:
             if self.debug:
                 print(f"DEBUG: Restarting video: {self.video_path}")
             else:
-                # self.player.stop()  # Stop the video completely
-                # self.player.set_position(0.0)  # Set the video to the first frame
-                # self.player.set_time(0.0)
-                self.player.play()  # Play again from the first frame
-                self.player.pause()  # Pause immediately, so it's reset but not playing
+                self.player.play()
+                self.player.pause()
                 print(f"Video reset to start: {self.video_path}")
         else:
             print("Video is not in a valid state to reset.")
