@@ -69,14 +69,15 @@ class VideoPlayer:
     def release(self): 
         if self.currently_playing:
             print("Cleaning up player resources...")
-            # Force video window to close by setting video output to None
-            self.player.set_hwnd(None)
             # Stop and release resources
             self.player.stop()
             self.media.release()
             self.player.release()
             self.instance.release()
             self.currently_playing = False
+            self.instance = None
+            self.player = None
+            self.media = None
             print("Player resources released")
 
     def pause(self):
