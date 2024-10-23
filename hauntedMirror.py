@@ -2,7 +2,6 @@ import os
 import queue
 import sys
 from pocketsphinx import LiveSpeech
-import vlc
 from pathlib import Path
 import argparse
 import random
@@ -12,6 +11,7 @@ import threading
 import signal
 import sys
 import time
+import video_player as VideoPlayer
 
 running = True
 
@@ -30,91 +30,6 @@ if input_device is None:
     print("No suitable input device found. Please check your audio settings.")
     sys.exit(1)
 print(f"Using input device: {devices[input_device]['name']}")
-
-class VideoPlayer:
-    def __init__(self, video_path, debug=False):
-        self.video_path = video_path
-        self.debug = debug
-        if not self.debug:
-            self.instance = vlc.Instance('--fullscreen', '--quiet')
-            self.player = self.instance.media_player_new()
-            self.media = self._create_new_media()
-            self.player.set_media(self.media)
-            self.event_manager = self.player.event_manager()
-            self.event_manager.event_attach(vlc.EventType.MediaPlayerEndReached, self.handle_media_state_changed)
-
-    def _create_new_media(self):
-        """Helper method to create a new media instance from the video path."""
-        return self.instance.media_new(str(self.video_path))
-
-    def play(self):
-        if self.debug:
-            print(f"DEBUG: Playing video: {self.video_path}")
-        else:
-            self.player.play()
-
-    def stop(self):
-        state = self.player.get_state()
-        if state in (vlc.State.Playing, vlc.State.Paused):
-            if self.debug:
-                print(f"DEBUG: Stopping video: {self.video_path}")
-            else:
-                self.player.stop()
-                print(f"Video stopped: {self.video_path}")
-        else:
-            print("Video is not currently playing or paused.")
-
-    def handle_media_state_changed(self, event):
-        threading.Timer(0.1, self.release).start()
-
-    def release(self):
-        """
-        Properly clean up and reset the media player resources.
-        This method ensures that the media is properly released and reset
-        to its original state for future playback.
-        """
-        print("Cleaning up player resources...")
-        
-        # Stop playback first
-        self.player.stop()
-        
-        # Release the current media
-        if self.media is not None:
-            self.media.release()
-            self.media = None
-        
-        # Small delay to ensure proper cleanup
-        time.sleep(0.25)
-        
-        # Create and set new media instance
-        self.media = self._create_new_media()
-        self.player.set_media(self.media)
-        
-        print(f"Player resources released and reset for: {self.video_path}")
-
-    def pause(self):
-        if self.debug:
-            print(f"DEBUG: Pausing video: {self.video_path}")
-        else:            
-            self.player.pause()
-
-    def reset(self):
-        state = self.player.get_state()
-        if state in (vlc.State.Playing, vlc.State.Paused, vlc.State.Ended):
-            if self.debug:
-                print(f"DEBUG: Restarting video: {self.video_path}")
-            else:
-                self.player.play()
-                self.player.pause()
-                print(f"Video reset to start: {self.video_path}")
-        else:
-            print("Video is not in a valid state to reset.")
-
-    def on_end_reached(self, event):
-        self.reset()
-    
-    def is_playing(self):
-        return self.player.get_state() in (vlc.State.Playing, vlc.State.Paused)
 
 def handle_speech(speech_generator, commands, command_queue):
     while True:
@@ -216,9 +131,6 @@ def main(args):
         kws='keywords.list',
         sampling_rate=16000
     )
-
-    # Start with a random video paused on the first frame
-    # play_random_video()
 
     print("Listening for commands:")
     print("\n".join(commands.keys()))
