@@ -8,7 +8,7 @@ class VideoPlayer:
         self.video_path = video_path
         self.debug = debug
         if not self.debug:
-            self.instance = vlc.Instance('--fullscreen', '--quiet')
+            self.instance = vlc.Instance('--fullscreen', '--quiet', '--avcodec-hw', 'none')
             self.player = self.instance.media_player_new()
             self.media = self._create_new_media()
             self.player.set_media(self.media)
