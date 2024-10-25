@@ -24,6 +24,7 @@ class VideoPlayer:
             print(f"DEBUG: Playing video: {self.video_path}")
         else:
             self.player.play()
+            self.player.set_time(3000)  # Time is in milliseconds
 
     def stop(self):
         state = self.player.get_state()
