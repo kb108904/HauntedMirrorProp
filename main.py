@@ -4,17 +4,10 @@ import sys
 import time
 from pathlib import Path
 from typing import Dict, Callable
-import os
 
 from audio_manager import AudioManager
 from video_manager import VideoManager
 from speech_handler import SpeechHandler
-
-
-# Disable screen blanking
-os.system('xset s off')
-os.system('xset -dpms')
-os.system('xset s noblank')
 
 class Application:
     def __init__(self, args):
