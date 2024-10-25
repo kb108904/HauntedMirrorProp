@@ -8,7 +8,7 @@ class VideoPlayer:
         self.video_path = video_path
         self.debug = debug
         if not self.debug:
-            self.instance = vlc.Instance('--quiet', '--avcodec-hw', 'none')
+            self.instance = vlc.Instance('--quiet', '--drm-vout-no-modeset')
             self.player = self.instance.media_player_new()
             self.media = self._create_new_media()
             self.player.set_media(self.media)
@@ -24,7 +24,7 @@ class VideoPlayer:
             print(f"DEBUG: Playing video: {self.video_path}")
         else:
             self.player.play()
-            self.player.set_time(3000)  # Time is in milliseconds
+            self.player.set_time(-2000)  # Time is in milliseconds
 
     def stop(self):
         state = self.player.get_state()
