@@ -77,7 +77,7 @@ class Application:
 
 def validate_video_paths(args) -> None:
     """Validate that all video files exist."""
-    for video_path in [args.blood_video, args.lady_video] + args.random_videos:
+    for video_path in [args.skeleton_video] + args.random_videos:
         if not video_path.exists():
             print(f"Error: Video file '{video_path}' not found.")
             sys.exit(1)
