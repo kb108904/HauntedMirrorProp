@@ -18,8 +18,7 @@ class Application:
         # Initialize managers
         self.devices, self.input_device = AudioManager.list_audio_devices()
         self.video_manager = VideoManager(
-            args.blood_video,
-            args.lady_video,
+            args.skeleton_video,
             args.random_videos,
             args.debug
         )
@@ -40,11 +39,13 @@ class Application:
     def create_commands(self) -> Dict[str, Callable]:
         """Create mapping of voice commands to actions."""
         return {
-            "stop video": self.video_manager.stop_current_video,
-            "exit video": self.quit_app,
-            "bloody mary bloody mary": lambda: self.video_manager.play_video("blood"),
-            "lady video": lambda: self.video_manager.play_video("lady"),
-            "random video": self.video_manager.play_random_video,
+            # "stop video": self.video_manager.stop_current_video,
+            # "exit video": self.quit_app,
+            "spooky scary skeleton": lambda: self.video_manager.play_video("skeleton"),
+            "mirror mirror": self.video_manager.play_random_video,
+            "scare me": self.video_manager.play_random_video,
+            "bloody mary": self.video_manager.play_random_video,
+            "what is this": self.video_manager.play_random_video,
         }
         
     def quit_app(self) -> None:
@@ -83,9 +84,7 @@ def validate_video_paths(args) -> None:
 
 def main():
     parser = argparse.ArgumentParser(description="Voice-controlled video player")
-    parser.add_argument("--blood-video", type=Path, required=True,
-                      help="Path to the 'blood' video file")
-    parser.add_argument("--lady-video", type=Path, required=True,
+    parser.add_argument("--skeleton-video", type=Path, required=True,
                       help="Path to the 'lady' video file")
     parser.add_argument("--random-videos", type=Path, nargs="+", required=True,
                       help="Paths to random video files")

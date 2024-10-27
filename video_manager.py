@@ -4,19 +4,17 @@ import random
 from video_player import VideoPlayer
 
 class VideoManager:
-    def __init__(self, blood_video: Path, lady_video: Path, random_videos: List[Path], debug: bool = False):
+    def __init__(self, skeleton_video: Path, random_videos: List[Path], debug: bool = False):
         """
         Initialize video manager with all video paths.
         
         Args:
-            blood_video (Path): Path to blood video
-            lady_video (Path): Path to lady video
+            skeleton_video (Path): Path to lady video
             random_videos (List[Path]): List of paths to random videos
             debug (bool): Enable debug mode
         """
         self.videos: Dict[str, VideoPlayer] = {
-            "blood": VideoPlayer(blood_video, debug),
-            "lady": VideoPlayer(lady_video, debug),
+            "skeleton": VideoPlayer(skeleton_video, debug),
         }
         self.random_videos = [VideoPlayer(video_path, debug) for video_path in random_videos]
         self.current_video: Optional[str] = None
