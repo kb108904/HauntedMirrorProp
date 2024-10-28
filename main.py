@@ -39,9 +39,6 @@ class Application:
     def create_commands(self) -> Dict[str, Callable]:
         """Create mapping of voice commands to actions."""
         return {
-            "ah": self.video_manager.stop_current_video,
-            "ahh": self.video_manager.stop_current_video,
-            "ahh": self.video_manager.stop_current_video,
             "my god": self.video_manager.stop_current_video,
             "stop": self.video_manager.stop_current_video,
             "no": self.video_manager.stop_current_video,
