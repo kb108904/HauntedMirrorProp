@@ -41,7 +41,6 @@ class Application:
         return {
             "my god": self.video_manager.stop_current_video,
             "stop": self.video_manager.stop_current_video,
-            "no": self.video_manager.stop_current_video,
             # "exit video": self.quit_app,
             "spooky scary skeleton": lambda: self.video_manager.play_video("skeleton"),
             "mirror mirror": self.video_manager.play_random_video,
