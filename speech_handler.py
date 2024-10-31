@@ -2,6 +2,7 @@ from typing import Dict, Callable, Iterator, Optional
 import queue
 import threading
 from pocketsphinx import LiveSpeech
+import os
 
 class SpeechHandler:
     def __init__(self, commands: Dict[str, Callable], sampling_rate: int = 16000):
@@ -21,9 +22,13 @@ class SpeechHandler:
         
     def _setup_keywords(self) -> None:
         """Create keywords list file for pocketsphinx."""
-        with open('keywords.list', 'w') as f:
+        file_path = 'keywords.list'
+        with open(file_path, 'w') as f:
             for command in self.commands.keys():
                 f.write(f"{command.lower()} /1e-40/\n")
+    
+        # Set read/write permissions for the owner and read for others
+        os.chmod(file_path, 0o644)  # Adjust permission mode as needed
                 
     def _initialize_speech(self) -> None:
         """Initialize LiveSpeech with keywords."""
